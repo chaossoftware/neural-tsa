@@ -11,19 +11,20 @@ public sealed class ConsoleNetVisualizer
     private const int InfoBorderOffset = 47;
     private const int RightPartOffset = 50;
     private const int ReportOffset = 20;
-    private const int TopRightOffset = 3;
+    private const int TopRightOffset = 6;
 
-    private const string InactiveNeuron = "░░";
-    private const string ActiveNeuron = "██";
-    private const string NeutralNeuron = "▒▒";
-    private const string WeakSynapse = ">  ";
-    private const string NeutralSynapse = ">> ";
-    private const string StrongSynapse = ">>>";
-    private const string InputNeuron = "@";
+    private const string InactiveNeuron = "▪";
+    private const string ActiveNeuron = "■";
+    private const string NeutralNeuron = "□";
+    private const string WeakSynapse = "–";
+    private const string NeutralSynapse = "═";
+    private const string StrongSynapse = "≡";
+    private const string InputNeuron = "●";
 
-    private const int MinOffsetY = 1;
+    private const int MinOffsetY = 0;
 
-    private readonly string _delimiter = new string('_', InfoBorderOffset - 2);
+    private readonly string _delimiterLong = new('_', InfoBorderOffset + 20);
+    private readonly string _delimiter = new('_', InfoBorderOffset - 2);
 
     private readonly int _inCount;
     private readonly int _hiddenCount;
@@ -52,11 +53,11 @@ public sealed class ConsoleNetVisualizer
         double error = net.OutputLayer.Neurons[0].ShortMemory[0];
         string currentIteration = net.current.ToString().PadRight(10);
 
-        Console.SetCursorPosition(RightPartOffset, 0);
-        Console.WriteLine($"Epoch {net.successCount}: {currentIteration:#,#}");
-        Console.SetCursorPosition(RightPartOffset, 2);
-        Console.WriteLine($"ε = {net.Epsilon:e}");
         Console.SetCursorPosition(RightPartOffset, 3);
+        Console.WriteLine($"Epoch {net.successCount}: {currentIteration:#,#}");
+        Console.SetCursorPosition(RightPartOffset, 5);
+        Console.WriteLine($"ε = {net.Epsilon:e}");
+        Console.SetCursorPosition(RightPartOffset, 6);
         Console.WriteLine($"e = {error:e}");
         Visualize();
         int offset = ReportOffset;
@@ -65,7 +66,7 @@ public sealed class ConsoleNetVisualizer
 
     public void PrintNetParams(NeuralNetParams neuralNetParams)
     {
-        Console.WriteLine(_delimiter);
+        Console.WriteLine(_delimiterLong);
 
         Console.WriteLine(neuralNetParams.GetInfoFull());
 

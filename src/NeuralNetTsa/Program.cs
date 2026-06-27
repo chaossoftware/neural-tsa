@@ -22,7 +22,7 @@ internal class Program
         foreach (var dataFile in config.Files)
         {
             Console.Clear();
-            Console.WriteLine($"Version: {versionInfo.ProductVersion}");
+            Console.WriteLine($"Version: {versionInfo.FileVersion}");
             Console.WriteLine($"File: {dataFile.FileName}");
             FileProcessor.ProcessFile(config, dataFile);
         }
