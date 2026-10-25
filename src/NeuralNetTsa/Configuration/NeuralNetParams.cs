@@ -9,7 +9,7 @@ namespace NeuralNetTsa.Configuration;
 /// </summary>
 public sealed class NeuralNetParams
 {
-    public NeuralNetParams(int neurons, int dimensions, int errorsExponent, int trainings, 
+    public NeuralNetParams(int neurons, int dimensions, int errorsExponent, int trainings,
         IActivationFunction actFunction)
     {
         Neurons = neurons;
@@ -20,8 +20,8 @@ public sealed class NeuralNetParams
     }
 
     public NeuralNetParams(int neurons, int dimensions, int errorsExponent, int trainings,
-        IActivationFunction actFunction, double eta, long epochInterval, int biasTerm, 
-        int constantTerm, double maxPertrubation, double nudge, int pruning, double testingInterval)
+        IActivationFunction actFunction, double eta, long epochInterval, int biasTerm,
+        int constantTerm, double maxPertrubation, double nudge, int pruning, double testingInterval, int seed)
     {
         Neurons = neurons;
         Dimensions = dimensions;
@@ -35,6 +35,7 @@ public sealed class NeuralNetParams
         ConstantTerm = constantTerm;
         MaxPertrubation = maxPertrubation;
         Nudge = nudge;
+        Seed = seed;
         Pruning = pruning;
         TestingInterval = testingInterval;
     }
@@ -75,10 +76,12 @@ public sealed class NeuralNetParams
     //Number of successful trainings to complete calculation
     public int Trainings { get; }
 
+    public int Seed { get; }
+
     //Activation function
     public IActivationFunction ActFunction { get; }
 
-    public string GetInfoShort() => 
+    public string GetInfoShort() =>
         new StringBuilder()
         .AppendFormat("Neurons             : {0}\n", Neurons)
         .AppendFormat("Dimensions          : {0}\n", Dimensions)
@@ -97,6 +100,7 @@ public sealed class NeuralNetParams
         .AppendFormat("Bias term           : {0}\n", BiasTerm)
         .AppendFormat("Constant term       : {0}\n", ConstantTerm)
         .AppendFormat("Pruning level       : {0}\n", Pruning)
-        .AppendFormat(CultureInfo.InvariantCulture, "Amt. to nudge to 0  : {0}", Nudge)
+        .AppendFormat(CultureInfo.InvariantCulture, "Amt. to nudge to 0  : {0}\n", Nudge)
+        .AppendFormat("Seed                : {0}\n", Seed)
         .ToString();
 }

@@ -10,7 +10,7 @@ public sealed class ConsoleNetVisualizer
 {
     private const int InfoBorderOffset = 47;
     private const int RightPartOffset = 50;
-    private const int ReportOffset = 20;
+    private const int ReportOffset = 21;
     private const int TopRightOffset = 6;
 
     private const string InactiveNeuron = "▪";

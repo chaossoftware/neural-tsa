@@ -18,7 +18,7 @@ public sealed class ChaosNeuralNet : INeuralNet
     public double[] xdata;
 
     //----- pre-calculated constants
-    private double tenPowNegativePruning;      
+    private double tenPowNegativePruning;
     private double minD5DivD;
     private double nmaxSubD_xmaxPowE;
     private int nMul_DSubCtAdd1_AddNAdd1;
@@ -33,16 +33,16 @@ public sealed class ChaosNeuralNet : INeuralNet
 
     private bool AdditionalNeuron;
 
-    public ChaosNeuralNet(NeuralNetParams taskParams, double[] array) 
+    public ChaosNeuralNet(NeuralNetParams taskParams, double[] array)
     {
         InputLayer = new BaseEntities.Layer<InputNeuron>(taskParams.Dimensions);
         HiddenLayer = new BaseEntities.Layer<HiddenNeuron>(taskParams.Neurons);
         OutputLayer = new BaseEntities.Layer<OutputNeuron>(1);
 
-        Connections = new List<PruneSynapse>[] 
-        { 
-            new List<PruneSynapse>(), 
-            new List<PruneSynapse>() 
+        Connections = new List<PruneSynapse>[]
+        {
+            new List<PruneSynapse>(),
+            new List<PruneSynapse>()
         };
 
         Params = taskParams;
@@ -135,7 +135,7 @@ public sealed class ChaosNeuralNet : INeuralNet
                         synapse.Prune = false;
                     }
                 }
-                
+
                 int prunes = 0;
 
                 for (int i = 0; i < Params.Neurons; i++)
@@ -156,7 +156,7 @@ public sealed class ChaosNeuralNet : INeuralNet
 
                 //Probability of changing a given parameter at each trial
                 //1 / Sqrt(neurons * (dims - Task_Params.ConstantTerm + 1) + neurons + 1 - prunes)
-                double pc = 1d / Math.Sqrt(nMul_DSubCtAdd1_AddNAdd1 - prunes); 
+                double pc = 1d / Math.Sqrt(nMul_DSubCtAdd1_AddNAdd1 - prunes);
 
                 if (Params.BiasTerm == 0)
                 {
@@ -230,7 +230,7 @@ public sealed class ChaosNeuralNet : INeuralNet
 
                 if (e1 < OutputLayer.Neurons[0].ShortMemory[0])
                 {
-                    #region memorize current weights and new error 
+                    #region memorize current weights and new error
                     improved++;
                     OutputLayer.Neurons[0].ShortMemory[0] = e1;
 
@@ -277,7 +277,7 @@ public sealed class ChaosNeuralNet : INeuralNet
                 }
 
                 NeuronRandomizer.Randomizer = Randoms.Create(seed, RandomType.FastestDouble);
-    
+
                 //Testing is costly - don't do it too often
                 if (current % Params.TestingInterval != 0)
                 {
@@ -398,7 +398,7 @@ public sealed class ChaosNeuralNet : INeuralNet
 
     public void ConstructNetwork()
     {
-        NeuronRandomizer.Randomizer = Randoms.FastestDouble;
+        NeuronRandomizer.Randomizer = Randoms.Create(Params.Seed, RandomType.FastestDouble);
 
         // init input layer
         for (int i = 0; i < Params.Dimensions; i++)

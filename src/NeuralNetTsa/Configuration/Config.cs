@@ -12,7 +12,7 @@ namespace NeuralNetTsa.Configuration;
 public sealed class Config
 {
     private const string OptionsFile = "app_config.xml";
-    
+
     private static readonly CultureInfo Culture = CultureInfo.InvariantCulture;
 
     private readonly XDocument _xConfig;
@@ -65,12 +65,20 @@ public sealed class Config
         var maxPertrubation = ParseDouble(xLowParams.Attribute("maxPertrubation").Value);
         var nudge = ParseDouble(xLowParams.Attribute("nudge").Value);
         var pruning = ParseInt(xLowParams.Attribute("pruning").Value);
+        var seedString = xLowParams.Attribute("seed").Value;
+
+        int seed = TryParseInt(seedString);
+
+        if (seed == -1)
+        {
+            seed = Random.Shared.Next();
+        }
 
         IActivationFunction activation = GetActivationFunction(activationFunction);
 
         NeuralNet = new NeuralNetParams(neurons, dimensions, errorExponent, trainings,
             activation, eta, epochInterval, biasTerm, constantTerm,
-            maxPertrubation, nudge, pruning, testingInterval);
+            maxPertrubation, nudge, pruning, testingInterval, seed);
     }
 
     private static IActivationFunction GetActivationFunction(string functionName)
@@ -152,7 +160,7 @@ public sealed class Config
             throw new ArgumentException("Unable to read files list");
         }
     }
-    
+
     private static int ParseInt(string value) =>
         int.Parse(value, NumberStyles.Integer, Culture);
 
@@ -166,7 +174,7 @@ public sealed class Config
         double.Parse(value, NumberStyles.Float, Culture);
 
     private static int TryParseInt(string value) =>
-        int.TryParse(value, NumberStyles.Integer, Culture, out int parsed) ? 
-        parsed : 
+        int.TryParse(value, NumberStyles.Integer, Culture, out int parsed) ?
+        parsed :
         -1;
 }
