@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using ChaosSoft.NeuralNetwork.Entities;
 
 namespace NeuralNetTsa.NeuralNet.Entities;
@@ -90,21 +91,29 @@ public abstract class NudgeNeuron<N> : INeuron<N> where N : NudgeNeuron<N>
         throw new NotImplementedException();
 
     /// <summary>
-    /// Returns the product of two normally (Gaussian) distributed random 
-    /// deviates with meanof zero and standard deviation of 1.0
+    /// Returns the product of two normally (Gaussian) distributed random
+    /// deviates with meanof zero and standard deviation of 1.0 (Optimized)
     /// </summary>
     /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static double Gauss2()
     {
+        // 1. Optimization: Local ref copy for randomizer.
+        var rng = NeuronRandomizer.Randomizer;
+
         double v1, v2, arg;
         do
         {
-            v1 = 2d * NeuronRandomizer.Randomizer.NextDouble() - 1d;
-            v2 = 2d * NeuronRandomizer.Randomizer.NextDouble() - 1d;
+            // 2. Optimization: use FMA instruction (var * const - const)
+            v1 = rng.NextDouble() * 2d - 1d;
+            v2 = rng.NextDouble() * 2d - 1d;
             arg = v1 * v1 + v2 * v2;
         }
         while (arg >= 1d || arg == 0d);
 
-        return v1 * v2 * (-2d + Math.Log(arg) / arg);
+        // 3. Optimization:
+        double invArg = 1d / arg;
+
+        return v1 * v2 * (-2d + Math.Log(arg) * invArg);
     }
 }

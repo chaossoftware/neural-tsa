@@ -19,9 +19,9 @@ public sealed class ChaosNeuralNet : INeuralNet
 
     //----- pre-calculated constants
     private double tenPowNegativePruning;
-    private double minD5DivD;
     private double nmaxSubD_xmaxPowE;
     private int nMul_DSubCtAdd1_AddNAdd1;
+    private double[] djFactors;
 
     private double ddw;
 
@@ -182,7 +182,7 @@ public sealed class ChaosNeuralNet : INeuralNet
                     for (int j = 0; j < Params.Dimensions; j++)
                     {
                         //Reduce neighborhood for large j by a factor of 1-32
-                        double dj = 1.0 / Math.Pow(2, minD5DivD * j);
+                        double dj = djFactors[j];
 
                         InputLayer.Neurons[j].CalculateWeight(i, ddw * dj, pc);
 
@@ -389,9 +389,17 @@ public sealed class ChaosNeuralNet : INeuralNet
         ConstructNetwork();
 
         tenPowNegativePruning = Math.Pow(10, -Params.Pruning);
-        minD5DivD = (double)Math.Min(Params.Dimensions, 5) / Params.Dimensions;
         nmaxSubD_xmaxPowE = (nmax - Params.Dimensions) * Math.Pow(xmax, Params.ErrorsExponent);
         nMul_DSubCtAdd1_AddNAdd1 = Params.Neurons * (Params.Dimensions - Params.ConstantTerm + 1) + Params.Neurons + 1;
+
+        // Precompute 1/2^(minD5DivD * j) for all j values to avoid Math.Pow in hot loop
+        var minD5DivD = (double)Math.Min(Params.Dimensions, 5) / Params.Dimensions;
+        djFactors = new double[Params.Dimensions];
+
+        for (int j = 0; j < Params.Dimensions; j++)
+        {
+            djFactors[j] = 1.0 / Math.Pow(2, minD5DivD * j);
+        }
 
         ddw = Params.MaxPertrubation;
     }
