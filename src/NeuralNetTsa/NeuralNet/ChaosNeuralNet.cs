@@ -377,10 +377,12 @@ public sealed class ChaosNeuralNet : INeuralNet
                 Console.SetCursorPosition(0, 18);
                 Console.WriteLine($"Epoch duration: {timer.ElapsedMilliseconds:#,#} ms\n");
                 EpochComplete.Invoke(this);
+                Console.SetCursorPosition(0, 25);
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error during performing calculations:\n" + ex);
+                Console.SetCursorPosition(0, 25);
+                Console.WriteLine("Error during performing calculations:\n" + ex.Message);
             }
 
             timer.Restart();

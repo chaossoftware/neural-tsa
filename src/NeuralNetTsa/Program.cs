@@ -2,6 +2,7 @@
 using System;
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 
@@ -22,7 +23,7 @@ internal class Program
         foreach (var dataFile in config.Files)
         {
             Console.Clear();
-            Console.WriteLine($"Version: {versionInfo.FileVersion}");
+            Console.Write($"[V{string.Join(".", versionInfo.FileVersion.Split('.').Take(3))}] ");
             Console.WriteLine($"File: {dataFile.FileName}");
             FileProcessor.ProcessFile(config, dataFile);
         }

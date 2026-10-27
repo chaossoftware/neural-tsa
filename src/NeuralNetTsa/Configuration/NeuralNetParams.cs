@@ -92,7 +92,8 @@ public sealed class NeuralNetParams
 
     public string GetInfoFull() =>
         new StringBuilder()
-        .Append(GetInfoShort() + "\n")
+        .Append(GetInfoShort())
+        .AppendLine("- - - - - - - - - - - - - - - - Low level - -")
         .AppendFormat(CultureInfo.InvariantCulture, "Epoch interval      : {0:0.#####e-0}\n", EpochInterval)
         .AppendFormat(CultureInfo.InvariantCulture, "Testing interval    : {0:0.#####e-0}\n", TestingInterval)
         .AppendFormat(CultureInfo.InvariantCulture, "Learning rate       : {0}\n", Eta)

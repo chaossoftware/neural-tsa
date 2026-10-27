@@ -9,22 +9,17 @@ namespace NeuralNetTsa.Visualization;
 public sealed class ConsoleNetVisualizer
 {
     private const int InfoBorderOffset = 47;
-    private const int RightPartOffset = 50;
-    private const int ReportOffset = 21;
-    private const int TopRightOffset = 6;
+    private const int RightPartOffset = 49;
+    private const int ReportOffset = 20;
+    private const int TopRightOffset = 7;
 
-    private const string InactiveNeuron = "▪";
-    private const string ActiveNeuron = "■";
-    private const string NeutralNeuron = "□";
-    private const string WeakSynapse = "–";
-    private const string NeutralSynapse = "═";
-    private const string StrongSynapse = "≡";
-    private const string InputNeuron = "●";
+    private const string InputNeuron = ">";
+    private const string Synapse = "==>";
 
     private const int MinOffsetY = 0;
 
-    private readonly string _delimiterLong = new('_', InfoBorderOffset + 20);
-    private readonly string _delimiter = new('_', InfoBorderOffset - 2);
+    private readonly string _delimiterLong = new string('─', InfoBorderOffset - 2) + "┬" + new string('─', 22);
+    private readonly string _delimiter = new string('─', InfoBorderOffset - 2) + "┘";
 
     private readonly int _inCount;
     private readonly int _hiddenCount;
@@ -45,21 +40,24 @@ public sealed class ConsoleNetVisualizer
 
         _inOffsetY = _maxItemsCount / _inCount + MinOffsetY;
         _hiddenOffsetY = _maxItemsCount / _hiddenCount + MinOffsetY;
-        _outOffsetY = _maxItemsCount / neuralNet.OutputLayer.Neurons.Length + MinOffsetY;
+        _outOffsetY = _maxItemsCount / neuralNet.OutputLayer.Neurons.Length / 2 + MinOffsetY;
     }
 
     public void ReportCycle(ChaosNeuralNet net)
     {
         double error = net.OutputLayer.Neurons[0].ShortMemory[0];
-        string currentIteration = net.current.ToString().PadRight(10);
+        string currentIteration = net.current.ToString("#,#").PadLeft(9);
+        string currentEpoch = net.successCount.ToString().PadLeft(2);
 
         Console.SetCursorPosition(RightPartOffset, 3);
-        Console.WriteLine($"Epoch {net.successCount}: {currentIteration:#,#}");
+        Console.WriteLine($"Epoch {currentEpoch}: {currentIteration}");
         Console.SetCursorPosition(RightPartOffset, 5);
-        Console.WriteLine($"ε = {net.Epsilon:e}");
+        Console.WriteLine($"ε  =  {net.Epsilon:e}");
         Console.SetCursorPosition(RightPartOffset, 6);
-        Console.WriteLine($"e = {error:e}");
+        Console.WriteLine($"e  =  {error:e}");
+
         Visualize();
+
         int offset = ReportOffset;
         Console.SetCursorPosition(0, offset);
     }
@@ -68,12 +66,14 @@ public sealed class ConsoleNetVisualizer
     {
         Console.WriteLine(_delimiterLong);
 
+        Console.Write("\x1b[37m");
         Console.WriteLine(neuralNetParams.GetInfoFull());
+        Console.ResetColor();
 
-        for (int i = 3; i < ReportOffset - 2; i++)
+        for (int i = 2; i < ReportOffset - 3; i++)
         {
             Console.SetCursorPosition(InfoBorderOffset - 2, i);
-            Console.Write("|");
+            Console.Write("│");
         }
 
         Console.SetCursorPosition(0, ReportOffset - 3);
@@ -93,9 +93,9 @@ public sealed class ConsoleNetVisualizer
 
         foreach (InputNeuron inn in _neuralNet.InputLayer.Neurons)
         {
-            string synapseBrush = GetSynapseBrush(inn.Outputs[0].Signal, lowSynapseTreshold, highSynapseTreshold);
             Console.SetCursorPosition(RightPartOffset, i * _inOffsetY + TopRightOffset);
-            Console.Write($"{InputNeuron} {synapseBrush}");
+            Console.Write($"{InputNeuron} ");
+            DrawSynapse(inn.Outputs[0].Signal, lowSynapseTreshold, highSynapseTreshold);
             i++;
         }
 
@@ -109,35 +109,51 @@ public sealed class ConsoleNetVisualizer
 
         foreach (HiddenNeuron hn in _neuralNet.HiddenLayer.Neurons)
         {
-            string synapseBrush = GetSynapseBrush(hn.Outputs[0].Signal, lowSynapseTreshold, highSynapseTreshold);
             Console.SetCursorPosition(RightPartOffset + 7, i * _hiddenOffsetY + TopRightOffset);
-            Console.Write($"{GetNeuronColor(hn)} {synapseBrush}");
+            DrawNeuron(hn);
+            DrawSynapse(hn.Outputs[0].Signal, lowSynapseTreshold, highSynapseTreshold);
             i++;
         }
 
         Console.SetCursorPosition(RightPartOffset + 14, _outOffsetY + TopRightOffset);
-        Console.Write($"{GetNeuronColor(_neuralNet.OutputLayer.Neurons[0])} {NeutralSynapse}");
+        DrawNeuron(_neuralNet.OutputLayer.Neurons[0]);
+        DrawSynapse(1, 1, 1);
     }
 
-    private static string GetNeuronColor(HiddenNeuron neuron) =>
-        neuron.Outputs[0].Signal > 0 ? ActiveNeuron : InactiveNeuron;
+    private static void DrawNeuron(HiddenNeuron neuron)
+    {
+        var color = neuron.Outputs[0].Signal > 0 ? "\x1b[32m" : "\x1b[37m";
 
-    private static string GetNeuronColor(OutputNeuron neuron) =>
-        neuron.Outputs[0].Signal > 0 ? ActiveNeuron : InactiveNeuron;
+        Console.Write(color);
+        Console.Write("■ ");
+        Console.ResetColor();
+    }
 
-    private static string GetSynapseBrush(double current, double firstThird, double secondThird)
+    private static void DrawNeuron(OutputNeuron neuron)
+    {
+        var color = neuron.Outputs[0].Signal > 0 ? "\x1b[32m" : "\x1b[37m";
+
+        Console.Write(color);
+        Console.Write("● ");
+        Console.ResetColor();
+    }
+
+    private static void DrawSynapse(double current, double firstThird, double secondThird)
     {
         if (current < firstThird)
         {
-            return WeakSynapse;
+            Console.Write("\x1b[32m");
         }
         else if (current > secondThird)
         {
-            return NeutralSynapse;
+            Console.Write("\x1b[33m");
         }
         else
         {
-            return StrongSynapse;
+            Console.Write("\x1b[37m");
         }
+
+        Console.Write(Synapse);
+        Console.ResetColor();
     }
 }
