@@ -82,8 +82,8 @@ public sealed class ConsoleNetVisualizer
 
     private void Visualize()
     {
-        double maxSynapseValue = _neuralNet.Connections[0].Max(s => s.Signal);
-        double minSynapseValue = _neuralNet.Connections[0].Min(s => s.Signal);
+        double maxSynapseValue = _neuralNet.InputLayer.Neurons.SelectMany(n => n.Outputs).Max(s => s.Signal);
+        double minSynapseValue = _neuralNet.InputLayer.Neurons.SelectMany(n => n.Outputs).Min(s => s.Signal);
 
         double segment = (maxSynapseValue - minSynapseValue) / 3d;
         double lowSynapseTreshold = minSynapseValue + segment;
@@ -99,8 +99,8 @@ public sealed class ConsoleNetVisualizer
             i++;
         }
 
-        maxSynapseValue = _neuralNet.Connections[1].Max(s => s.Signal);
-        minSynapseValue = _neuralNet.Connections[1].Min(s => s.Signal);
+        maxSynapseValue = _neuralNet.HiddenLayer.Neurons.SelectMany(n => n.Outputs).Max(s => s.Signal);
+        minSynapseValue = _neuralNet.HiddenLayer.Neurons.SelectMany(n => n.Outputs).Min(s => s.Signal);
 
         segment = (maxSynapseValue - minSynapseValue) / 3d;
         lowSynapseTreshold = minSynapseValue + segment;

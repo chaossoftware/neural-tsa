@@ -4,7 +4,7 @@ namespace NeuralNetTsa.NeuralNet.Entities;
 
 public sealed class PruneSynapse : Synapse
 {
-    public PruneSynapse(int sourceIndex, int destinationIndex) 
+    public PruneSynapse(int sourceIndex, int destinationIndex)
         : base(sourceIndex, destinationIndex)
     {
         Prune = false;

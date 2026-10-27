@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using ChaosSoft.Core.DataUtils;
 using MersenneTwister;
@@ -33,21 +32,38 @@ public sealed class ChaosNeuralNet : INeuralNet
 
     private bool AdditionalNeuron;
 
-    public ChaosNeuralNet(NeuralNetParams taskParams, double[] array)
+    public ChaosNeuralNet(NeuralNetParams taskParams, double[] timeseries)
     {
+        Params = taskParams;
+
         InputLayer = new BaseEntities.Layer<InputNeuron>(taskParams.Dimensions);
         HiddenLayer = new BaseEntities.Layer<HiddenNeuron>(taskParams.Neurons);
         OutputLayer = new BaseEntities.Layer<OutputNeuron>(1);
 
-        Connections = new List<PruneSynapse>[]
-        {
-            new List<PruneSynapse>(),
-            new List<PruneSynapse>()
-        };
-
-        Params = taskParams;
         AdditionalNeuron = Params.ActFunction is ComplexActivationFunction;
-        Init(array);
+
+        NeuronRandomizer.Randomizer = Randoms.Create(Params.Seed, RandomType.FastestDouble);
+
+        nmax = timeseries.Length;
+        double xmax = Vector.MaxAbs(timeseries);
+
+        // create array with data
+        xdata = new double[nmax];
+        Array.Copy(timeseries, xdata, nmax);
+
+        tenPowNegativePruning = Math.Pow(10, -Params.Pruning);
+        nmaxSubD_xmaxPowE = (nmax - Params.Dimensions) * Math.Pow(xmax, Params.ErrorsExponent);
+        nMul_DSubCtAdd1_AddNAdd1 = Params.Neurons * (Params.Dimensions - Params.ConstantTerm + 1) + Params.Neurons + 1;
+
+        // Precompute 1/2^(minD5DivD * j) for all j values to avoid Math.Pow in hot loop
+        djFactors = new double[Params.Dimensions];
+
+        for (int j = 0; j < Params.Dimensions; j++)
+        {
+            djFactors[j] = 1d / Math.Pow(2d, Math.Min(Params.Dimensions, 5d) / Params.Dimensions * j);
+        }
+
+        ddw = Params.MaxPertrubation;
     }
 
     public delegate void NeuralNetEvent(ChaosNeuralNet network);
@@ -67,8 +83,6 @@ public sealed class ChaosNeuralNet : INeuralNet
     public BaseEntities.Layer<HiddenNeuron> HiddenLayer { get; }
 
     public BaseEntities.Layer<OutputNeuron> OutputLayer { get; }
-
-    public List<PruneSynapse>[] Connections { get; }
 
     public double Epsilon => Math.Abs(ddw);
 
@@ -373,108 +387,6 @@ public sealed class ChaosNeuralNet : INeuralNet
         }
     }
 
-    /// <summary>
-    /// Init neural network parameters
-    /// all arrays should have +1 length
-    /// </summary>
-    private void Init(double[] sourceArray)
-    {
-        nmax = sourceArray.Length;
-        double xmax = Vector.MaxAbs(sourceArray);
-
-        // create array with data
-        xdata = new double[nmax];
-        Array.Copy(sourceArray, xdata, nmax);
-
-        ConstructNetwork();
-
-        tenPowNegativePruning = Math.Pow(10, -Params.Pruning);
-        nmaxSubD_xmaxPowE = (nmax - Params.Dimensions) * Math.Pow(xmax, Params.ErrorsExponent);
-        nMul_DSubCtAdd1_AddNAdd1 = Params.Neurons * (Params.Dimensions - Params.ConstantTerm + 1) + Params.Neurons + 1;
-
-        // Precompute 1/2^(minD5DivD * j) for all j values to avoid Math.Pow in hot loop
-        var minD5DivD = (double)Math.Min(Params.Dimensions, 5) / Params.Dimensions;
-        djFactors = new double[Params.Dimensions];
-
-        for (int j = 0; j < Params.Dimensions; j++)
-        {
-            djFactors[j] = 1.0 / Math.Pow(2, minD5DivD * j);
-        }
-
-        ddw = Params.MaxPertrubation;
-    }
-
-    public void ConstructNetwork()
-    {
-        NeuronRandomizer.Randomizer = Randoms.Create(Params.Seed, RandomType.FastestDouble);
-
-        // init input layer
-        for (int i = 0; i < Params.Dimensions; i++)
-        {
-            InputNeuron neuron = new(Params.Nudge, Params.Neurons);
-            neuron.Inputs.Add(new PruneSynapse(i, i, 1));
-            InputLayer.Neurons[i] = neuron;
-        }
-
-        // init constant neuron
-        NeuronConstant = new BiasNeuron(Params.Nudge, Params.Neurons);
-
-        // init hidden layer
-        HiddenNeuron.Function = Params.ActFunction;
-
-        for (int i = 0; i < Params.Neurons; i++)
-        {
-            HiddenNeuron neuron = new(Params.Nudge, 1);
-            HiddenLayer.Neurons[i] = neuron;
-        }
-
-        // init bias neuron
-        NeuronBias = new BiasNeuron(Params.Nudge, 1);
-
-        // init output layer
-        OutputNeuron outNeuron = new(Params.Nudge, 1);
-        outNeuron.Outputs.Add(new PruneSynapse(0, 0, 1));
-        OutputLayer.Neurons[0] = outNeuron;
-
-        //Connect input and hidden layer neurons
-        for (int i = 0; i < Params.Dimensions; i++)
-        {
-            for (int j = 0; j < Params.Neurons; j++)
-            {
-                Connections[0].Add(new PruneSynapse(i, j));
-            }
-        }
-
-        //Connect constant and hidden neurons bias inputs
-        for (int i = 0; i < Params.Neurons; i++)
-        {
-            PruneSynapse constantSynapse = new(Params.Dimensions, i);
-            NeuronConstant.Outputs.Add(constantSynapse);
-            HiddenLayer.Neurons[i].BiasInput = constantSynapse;
-        }
-
-        //Connect hidden and output layer neurons
-        for (int i = 0; i < Params.Neurons; i++)
-        {
-            Connections[1].Add(new PruneSynapse(i, 0));
-        }
-
-        //Connect bias output and output neuron bias inputs
-        PruneSynapse biasSynapse = new(Params.Neurons, 1);
-        NeuronBias.Outputs.Add(biasSynapse);
-        OutputLayer.Neurons[0].BiasInput = biasSynapse;
-
-
-        foreach (var synapse in Connections[0])
-        {
-            InputLayer.Neurons[synapse.InIndex].Outputs.Add(synapse);
-            HiddenLayer.Neurons[synapse.OutIndex].Inputs.Add(synapse);
-        }
-
-        foreach (var synapse in Connections[1])
-        {
-            HiddenLayer.Neurons[synapse.InIndex].Outputs.Add(synapse);
-            OutputLayer.Neurons[synapse.OutIndex].Inputs.Add(synapse);
-        }
-    }
+    void INeuralNet.ConstructNetwork()
+        => throw new NotImplementedException();
 }

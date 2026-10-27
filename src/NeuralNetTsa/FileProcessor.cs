@@ -37,7 +37,7 @@ internal static class FileProcessor
         int length = data.TimeSeries.YValues.Length - output.PtsToTrain;
         var xdata = data.TimeSeries.YValues.Take(length).ToArray();
 
-        ChaosNeuralNet neuralNet = new(neuralNetParams, xdata);
+        ChaosNeuralNet neuralNet = NeuralNetBuilder.BuildNeuralNet(neuralNetParams, xdata);
         ConsoleNetVisualizer consoleVisualizer = new(neuralNet);
 
         Logger.LogInfo(neuralNetParams.GetInfoFull(), true);

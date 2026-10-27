@@ -59,10 +59,11 @@ public sealed class NetVisualizer
             CalculateSizes(inputsCount, hiddenCount, outputsCount);
         }
 
-        var maxSynapseValue = net.Connections[0].Max(s => s.Signal);
-        var minSynapseValue = net.Connections[0].Min(s => s.Signal);
+        var inputToHiddenSynapses = net.InputLayer.Neurons.SelectMany(n => n.Outputs).ToList();
+        var maxSynapseValue = inputToHiddenSynapses.Max(s => s.Signal);
+        var minSynapseValue = inputToHiddenSynapses.Min(s => s.Signal);
 
-        foreach (var synapse in net.Connections[0])
+        foreach (var synapse in inputToHiddenSynapses)
         {
             var sourceCenter = GetItemCenter(synapse.InIndex, yOffset1, xCenter1);
             var destinationCenter = GetItemCenter(synapse.OutIndex, yOffset2, xCenter2);
@@ -70,10 +71,11 @@ public sealed class NetVisualizer
             DrawSynapse(synapse.Signal, g, sourceCenter, destinationCenter, GetSynapseThickness(synapse.Signal, minSynapseValue, maxSynapseValue));
         }
 
-        maxSynapseValue = net.Connections[1].Max(s => s.Signal);
-        minSynapseValue = net.Connections[1].Min(s => s.Signal);
+        var hiddenToOutputSynapses = net.HiddenLayer.Neurons.SelectMany(n => n.Outputs).ToList();
+        maxSynapseValue = hiddenToOutputSynapses.Max(s => s.Signal);
+        minSynapseValue = hiddenToOutputSynapses.Min(s => s.Signal);
 
-        foreach (var synapse in net.Connections[1])
+        foreach (var synapse in hiddenToOutputSynapses)
         {
             var sourceCenter = GetItemCenter(synapse.InIndex, yOffset2, xCenter2);
             var destinationCenter = GetItemCenter(synapse.OutIndex, yOffset3, xCenter3);
