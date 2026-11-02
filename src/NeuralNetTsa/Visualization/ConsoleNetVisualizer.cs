@@ -8,9 +8,10 @@ namespace NeuralNetTsa.Visualization;
 
 public sealed class ConsoleNetVisualizer
 {
+    public const int EndOfOutput = ReportOffset + 8;
+    private const int ReportOffset = 17;
     private const int InfoBorderOffset = 47;
     private const int RightPartOffset = 49;
-    private const int ReportOffset = 20;
     private const int TopRightOffset = 7;
 
     private const string InputNeuron = ">";
@@ -58,8 +59,7 @@ public sealed class ConsoleNetVisualizer
 
         Visualize();
 
-        int offset = ReportOffset;
-        Console.SetCursorPosition(0, offset);
+        Console.SetCursorPosition(0, EndOfOutput);
     }
 
     public void PrintNetParams(NeuralNetParams neuralNetParams)
@@ -70,13 +70,13 @@ public sealed class ConsoleNetVisualizer
         Console.WriteLine(neuralNetParams.GetInfoFull());
         Console.ResetColor();
 
-        for (int i = 2; i < ReportOffset - 3; i++)
+        for (int i = 2; i < ReportOffset; i++)
         {
             Console.SetCursorPosition(InfoBorderOffset - 2, i);
             Console.Write("│");
         }
 
-        Console.SetCursorPosition(0, ReportOffset - 3);
+        Console.SetCursorPosition(0, ReportOffset);
         Console.WriteLine(_delimiter);
     }
 

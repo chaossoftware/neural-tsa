@@ -7,6 +7,7 @@ using NeuralNetTsa.NeuralNet.Entities;
 using ChaosSoft.NeuralNetwork.Networks;
 using BaseEntities = ChaosSoft.NeuralNetwork.Entities;
 using NeuralNetTsa.NeuralNet.CustomActivation;
+using NeuralNetTsa.Visualization;
 
 namespace NeuralNetTsa.NeuralNet;
 
@@ -377,11 +378,10 @@ public sealed class ChaosNeuralNet : INeuralNet
                 Console.SetCursorPosition(0, 18);
                 Console.WriteLine($"Epoch duration: {timer.ElapsedMilliseconds:#,#} ms\n");
                 EpochComplete.Invoke(this);
-                Console.SetCursorPosition(0, 25);
             }
             catch (Exception ex)
             {
-                Console.SetCursorPosition(0, 25);
+                Console.SetCursorPosition(0, ConsoleNetVisualizer.EndOfOutput);
                 Console.WriteLine("Error during performing calculations:\n" + ex.Message);
             }
 
