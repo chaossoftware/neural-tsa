@@ -50,16 +50,16 @@ public sealed class NetVisualizer
 
         g.FillRectangle(Brushes.Transparent, new Rectangle(new Point(0, 0), _bitmap.Size));
 
-        int inputsCount = net.InputLayer.Neurons.Length;
-        int hiddenCount = net.HiddenLayer.Neurons.Length;
-        int outputsCount = net.OutputLayer.Neurons.Length;
+        int inputsCount = net.InputLayer.Length;
+        int hiddenCount = net.HiddenLayer.Length;
+        int outputsCount = net.OutputLayer.Length;
 
         if (neuronSize == 0)
         {
             CalculateSizes(inputsCount, hiddenCount, outputsCount);
         }
 
-        var inputToHiddenSynapses = net.InputLayer.Neurons.SelectMany(n => n.Outputs).ToList();
+        var inputToHiddenSynapses = net.InputLayer.SelectMany(n => n.Outputs).ToList();
         var maxSynapseValue = inputToHiddenSynapses.Max(s => s.Signal);
         var minSynapseValue = inputToHiddenSynapses.Min(s => s.Signal);
 
@@ -71,7 +71,7 @@ public sealed class NetVisualizer
             DrawSynapse(synapse.Signal, g, sourceCenter, destinationCenter, GetSynapseThickness(synapse.Signal, minSynapseValue, maxSynapseValue));
         }
 
-        var hiddenToOutputSynapses = net.HiddenLayer.Neurons.SelectMany(n => n.Outputs).ToList();
+        var hiddenToOutputSynapses = net.HiddenLayer.SelectMany(n => n.Outputs).ToList();
         maxSynapseValue = hiddenToOutputSynapses.Max(s => s.Signal);
         minSynapseValue = hiddenToOutputSynapses.Min(s => s.Signal);
 
@@ -83,41 +83,41 @@ public sealed class NetVisualizer
             DrawSynapse(synapse.Signal, g, sourceCenter, destinationCenter, GetSynapseThickness(synapse.Signal, minSynapseValue, maxSynapseValue));
         }
 
-        maxSynapseValue = net.InputLayer.Neurons.Select(n => n.Inputs[0]).Max(s => s.Signal);
-        minSynapseValue = net.InputLayer.Neurons.Select(n => n.Inputs[0]).Min(s => s.Signal);
+        maxSynapseValue = net.InputLayer.Select(n => n.Inputs[0]).Max(s => s.Signal);
+        minSynapseValue = net.InputLayer.Select(n => n.Inputs[0]).Min(s => s.Signal);
 
         for (int i = 0; i < inputsCount; i++)
         {
             var sourceCenter = GetItemCenter(i, yOffset1, xCenter1);
             var pointStart = new PointF(0f, sourceCenter.Y);
 
-            double thickness = GetSynapseThickness(net.InputLayer.Neurons[i].Inputs[0].Signal, minSynapseValue, maxSynapseValue);
+            double thickness = GetSynapseThickness(net.InputLayer[i].Inputs[0].Signal, minSynapseValue, maxSynapseValue);
 
             if (double.IsNaN(thickness))
             {
                 thickness = maxSinapseThickness / 2;
             }
 
-            DrawSynapse(net.InputLayer.Neurons[i].Inputs[0].Signal, g, pointStart, sourceCenter, thickness);
-            DrawNeuron(g, gp, net.InputLayer.Neurons[i], sourceCenter);
+            DrawSynapse(net.InputLayer[i].Inputs[0].Signal, g, pointStart, sourceCenter, thickness);
+            DrawNeuron(g, gp, net.InputLayer[i], sourceCenter);
         }
 
         for (int i = 0; i < hiddenCount; i++)
         {
             var sourceCenter = GetItemCenter(i, yOffset2, xCenter2);
 
-            DrawNeuron(g, gp, net.HiddenLayer.Neurons[i], sourceCenter);
+            DrawNeuron(g, gp, net.HiddenLayer[i], sourceCenter);
         }
 
         for (int i = 0; i < outputsCount; i++)
         {
             var sourceCenter = GetItemCenter(i, yOffset3, xCenter3);
             var pointStart = new PointF(_bitmap.Width, sourceCenter.Y);
-            var thickness = GetSynapseThickness(net.OutputLayer.Neurons[i].Outputs[0].Signal, minSynapseValue, maxSynapseValue);
+            var thickness = GetSynapseThickness(net.OutputLayer[i].Outputs[0].Signal, minSynapseValue, maxSynapseValue);
             thickness = Math.Min(thickness, neuronSize);
 
-            DrawSynapse(net.OutputLayer.Neurons[i].Outputs[0].Signal, g, pointStart, sourceCenter, thickness);
-            DrawNeuron(g, gp, net.OutputLayer.Neurons[i], sourceCenter);
+            DrawSynapse(net.OutputLayer[i].Outputs[0].Signal, g, pointStart, sourceCenter, thickness);
+            DrawNeuron(g, gp, net.OutputLayer[i], sourceCenter);
         }
 
         g.DrawPath(new Pen(Color.FromArgb(0, Color.Black), 0), gp);

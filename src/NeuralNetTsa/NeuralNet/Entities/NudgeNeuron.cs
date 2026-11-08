@@ -1,28 +1,26 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using ChaosSoft.NeuralNetwork.Entities;
 
 namespace NeuralNetTsa.NeuralNet.Entities;
 
-public abstract class NudgeNeuron<N> : INeuron<N> where N : NudgeNeuron<N>
+public abstract class NudgeNeuron
 {
-    protected NudgeNeuron(int capacity) : this(0d, capacity)
+    protected NudgeNeuron(int inputs, int capacity) : this(0d, inputs, capacity)
     {
     }
 
-    protected NudgeNeuron(double nudge, int capacity)
+    protected NudgeNeuron(double nudge, int inputs, int capacity)
     {
-        Inputs = new List<PruneSynapse>();
-        Outputs = new List<PruneSynapse>();
+        Inputs = new PruneSynapse[inputs];
+        Outputs = new PruneSynapse[capacity];
         ShortMemory = new double[capacity];
         LongMemory = new double[capacity];
         Nudge = nudge;
     }
 
-    public List<PruneSynapse> Inputs { get; }
+    public PruneSynapse[] Inputs { get; }
 
-    public List<PruneSynapse> Outputs { get; }
+    public PruneSynapse[] Outputs { get; }
 
     public double[] ShortMemory { get; }
 
@@ -47,7 +45,7 @@ public abstract class NudgeNeuron<N> : INeuron<N> where N : NudgeNeuron<N>
 
     public void LongMemoryToShort()
     {
-        for(int i = 0; i < Outputs.Count; i++)
+        for(int i = 0; i < Outputs.Length; i++)
         {
             ShortMemory[i] = LongMemory[i];
         }
@@ -55,7 +53,7 @@ public abstract class NudgeNeuron<N> : INeuron<N> where N : NudgeNeuron<N>
 
     public void WeightsToShortMemory()
     {
-        for (int i = 0; i < Outputs.Count; i++)
+        for (int i = 0; i < Outputs.Length; i++)
         {
             ShortMemory[i] = Outputs[i].Weight;
         }
@@ -63,7 +61,7 @@ public abstract class NudgeNeuron<N> : INeuron<N> where N : NudgeNeuron<N>
 
     public void ShortMemoryToWeights()
     {
-        for (int i = 0; i < Outputs.Count; i++)
+        for (int i = 0; i < Outputs.Length; i++)
         {
             Outputs[i].Weight = ShortMemory[i];
         }
@@ -71,7 +69,7 @@ public abstract class NudgeNeuron<N> : INeuron<N> where N : NudgeNeuron<N>
 
     public void LongMemoryToWeights()
     {
-        for (int i = 0; i < Outputs.Count; i++)
+        for (int i = 0; i < Outputs.Length; i++)
         {
             Outputs[i].Weight = LongMemory[i];
         }
@@ -79,7 +77,7 @@ public abstract class NudgeNeuron<N> : INeuron<N> where N : NudgeNeuron<N>
 
     public void ShortMemoryToLong()
     {
-        for (int i = 0; i < Outputs.Count; i++)
+        for (int i = 0; i < Outputs.Length; i++)
         {
             LongMemory[i] = ShortMemory[i];
         }

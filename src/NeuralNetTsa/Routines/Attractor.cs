@@ -29,10 +29,10 @@ internal static class Attractor
 
                 for (int j = 0; j < dimensions; j++)
                 {
-                    arg += net.InputLayer.Neurons[j].LongMemory[i] * xlast[j - 1 + 1];
+                    arg += net.InputLayer[j].LongMemory[i] * xlast[j - 1 + 1];
                 }
 
-                xnew += net.HiddenLayer.Neurons[i].LongMemory[0] * net.Params.ActFunction.Phi(arg);
+                xnew += net.HiddenLayer[i].LongMemory[0] * net.Params.ActFunction.Phi(arg);
             }
 
             for (int j = dimensions; j > 0; j--)

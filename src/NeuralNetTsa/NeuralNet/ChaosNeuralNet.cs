@@ -5,7 +5,6 @@ using MersenneTwister;
 using NeuralNetTsa.Configuration;
 using NeuralNetTsa.NeuralNet.Entities;
 using ChaosSoft.NeuralNetwork.Networks;
-using BaseEntities = ChaosSoft.NeuralNetwork.Entities;
 using NeuralNetTsa.NeuralNet.CustomActivation;
 using NeuralNetTsa.Visualization;
 
@@ -37,9 +36,9 @@ public sealed class ChaosNeuralNet : INeuralNet
     {
         Params = taskParams;
 
-        InputLayer = new BaseEntities.Layer<InputNeuron>(taskParams.Dimensions);
-        HiddenLayer = new BaseEntities.Layer<HiddenNeuron>(taskParams.Neurons);
-        OutputLayer = new BaseEntities.Layer<OutputNeuron>(1);
+        InputLayer = new InputNeuron [taskParams.Dimensions];
+        HiddenLayer = new HiddenNeuron [taskParams.Neurons];
+        OutputLayer = new OutputNeuron [1];
 
         AdditionalNeuron = Params.ActFunction is ComplexActivationFunction;
 
@@ -79,11 +78,11 @@ public sealed class ChaosNeuralNet : INeuralNet
 
     public BiasNeuron NeuronConstant { get; set; }
 
-    public BaseEntities.Layer<InputNeuron> InputLayer { get; }
+    public InputNeuron[] InputLayer { get; }
 
-    public BaseEntities.Layer<HiddenNeuron> HiddenLayer { get; }
+    public HiddenNeuron[] HiddenLayer { get; }
 
-    public BaseEntities.Layer<OutputNeuron> OutputLayer { get; }
+    public OutputNeuron[] OutputLayer { get; }
 
     public double Epsilon => Math.Abs(ddw);
 
@@ -93,27 +92,27 @@ public sealed class ChaosNeuralNet : INeuralNet
     {
         while (successCount < Params.Trainings)
         {
-            if (OutputLayer.Neurons[0].LongMemory[0] == 0)
+            if (OutputLayer[0].LongMemory[0] == 0)
             {
-                OutputLayer.Neurons[0].ShortMemory[0] = 1000;
+                OutputLayer[0].ShortMemory[0] = 1000;
             }
             else
             {
-                OutputLayer.Neurons[0].ShortMemory[0] = 10 * OutputLayer.Neurons[0].LongMemory[0];
-                ddw = Math.Min(Params.MaxPertrubation, Math.Sqrt(OutputLayer.Neurons[0].LongMemory[0]));
+                OutputLayer[0].ShortMemory[0] = 10 * OutputLayer[0].LongMemory[0];
+                ddw = Math.Min(Params.MaxPertrubation, Math.Sqrt(OutputLayer[0].LongMemory[0]));
             }
 
             #region "update memory with best results"
 
             //update memory with best results
-            foreach (InputNeuron neuron in InputLayer.Neurons)
+            foreach (InputNeuron neuron in InputLayer)
             {
                 neuron.LongMemoryToShort();
             }
 
             NeuronConstant.LongMemoryToShort();
 
-            foreach (HiddenNeuron neuron in HiddenLayer.Neurons)
+            foreach (HiddenNeuron neuron in HiddenLayer)
             {
                 neuron.LongMemoryToShort();
             }
@@ -137,7 +136,7 @@ public sealed class ChaosNeuralNet : INeuralNet
             {
                 if (Params.Pruning == 0)
                 {
-                    foreach (InputNeuron neuron in InputLayer.Neurons)
+                    foreach (InputNeuron neuron in InputLayer)
                     {
                         foreach (PruneSynapse synapse in neuron.Outputs)
                         {
@@ -157,7 +156,7 @@ public sealed class ChaosNeuralNet : INeuralNet
                 {
                     for (int j = 0; j < Params.Dimensions; j++)
                     {
-                        if (InputLayer.Neurons[j].Outputs[i].Weight == 0)
+                        if (InputLayer[j].Outputs[i].Weight == 0)
                         {
                             prunes++;
                         }
@@ -184,7 +183,7 @@ public sealed class ChaosNeuralNet : INeuralNet
 
                 for (int i = 0; i < Params.Neurons; i++)
                 {
-                    HiddenLayer.Neurons[i].CalculateWeight(0, ddw, 9 * pc);
+                    HiddenLayer[i].CalculateWeight(0, ddw, 9 * pc);
 
                     if (Params.ConstantTerm == 0)
                     {
@@ -199,10 +198,10 @@ public sealed class ChaosNeuralNet : INeuralNet
                         //Reduce neighborhood for large j by a factor of 1-32
                         double dj = djFactors[j];
 
-                        InputLayer.Neurons[j].CalculateWeight(i, ddw * dj, pc);
+                        InputLayer[j].CalculateWeight(i, ddw * dj, pc);
 
                         //This connection has been pruned
-                        InputLayer.Neurons[j].Outputs[i].PruneIfMarked();
+                        InputLayer[j].Outputs[i].PruneIfMarked();
                     }
                 }
 
@@ -224,17 +223,17 @@ public sealed class ChaosNeuralNet : INeuralNet
                     // get inputs from signal data
                     for (int j = 0; j < Params.Dimensions; j++)
                     {
-                        InputLayer.Neurons[j].Inputs[0].Signal = xdata[k - j - 1];
+                        InputLayer[j].Inputs[0].Signal = xdata[k - j - 1];
                     }
 
-                    InputLayer.Process();
+                    Array.ForEach(InputLayer, n => n.Process());
 
-                    HiddenLayer.Process();
+                    Array.ForEach(HiddenLayer, n => n.Process());
 
-                    OutputLayer.Process();
+                    Array.ForEach(OutputLayer, n => n.Process());
 
                     //Error in the prediction of the k-th data point
-                    double ex = Math.Abs(OutputLayer.Neurons[0].Outputs[0].Signal - xdata[k]);
+                    double ex = Math.Abs(OutputLayer[0].Outputs[0].Signal - xdata[k]);
                     e1 += Math.Pow(ex, Params.ErrorsExponent);
                 }
 
@@ -243,18 +242,18 @@ public sealed class ChaosNeuralNet : INeuralNet
 
                 #endregion
 
-                if (e1 < OutputLayer.Neurons[0].ShortMemory[0])
+                if (e1 < OutputLayer[0].ShortMemory[0])
                 {
                     #region memorize current weights and new error
                     improved++;
-                    OutputLayer.Neurons[0].ShortMemory[0] = e1;
+                    OutputLayer[0].ShortMemory[0] = e1;
 
-                    foreach (InputNeuron neuron in InputLayer.Neurons)
+                    foreach (InputNeuron neuron in InputLayer)
                     {
                         neuron.WeightsToShortMemory();
                     }
 
-                    foreach (HiddenNeuron neuron in HiddenLayer.Neurons)
+                    foreach (HiddenNeuron neuron in HiddenLayer)
                     {
                         neuron.WeightsToShortMemory();
                     }
@@ -308,7 +307,7 @@ public sealed class ChaosNeuralNet : INeuralNet
                     Console.WriteLine("Error during logging neural network cycle:\n" + ex);
                 }
 
-                if (OutputLayer.Neurons[0].ShortMemory[0] > OutputLayer.Neurons[0].LongMemory[0] && OutputLayer.Neurons[0].LongMemory[0] != 0)
+                if (OutputLayer[0].ShortMemory[0] > OutputLayer[0].LongMemory[0] && OutputLayer[0].LongMemory[0] != 0)
                 {
                     continue;
                 }
@@ -327,16 +326,16 @@ public sealed class ChaosNeuralNet : INeuralNet
                     {
                         for (int j = 0; j < Params.Dimensions; j++)
                         {
-                            double aBest = InputLayer.Neurons[j].ShortMemory[i];
-                            double bBest = HiddenLayer.Neurons[i].ShortMemory[0];
+                            double aBest = InputLayer[j].ShortMemory[i];
+                            double bBest = HiddenLayer[i].ShortMemory[0];
 
                             if (aBest != 0 && Math.Abs(aBest * bBest) < tenPowNegativePruning)
                             {
-                                InputLayer.Neurons[j].Outputs[i].Prune = true;
+                                InputLayer[j].Outputs[i].Prune = true;
                             }
                         }
 
-                        if (NeuronConstant.ShortMemory[i] != 0 && Math.Abs(NeuronConstant.ShortMemory[i] * HiddenLayer.Neurons[i].ShortMemory[0]) < tenPowNegativePruning)
+                        if (NeuronConstant.ShortMemory[i] != 0 && Math.Abs(NeuronConstant.ShortMemory[i] * HiddenLayer[i].ShortMemory[0]) < tenPowNegativePruning)
                         {
                             NeuronConstant.Outputs[i].Prune = true;
                         }
@@ -349,12 +348,12 @@ public sealed class ChaosNeuralNet : INeuralNet
             #region "Save best weights"
 
             //Save best weights
-            foreach (InputNeuron neuron in InputLayer.Neurons)
+            foreach (InputNeuron neuron in InputLayer)
             {
                 neuron.ShortMemoryToLong();
             }
 
-            foreach (HiddenNeuron neuron in HiddenLayer.Neurons)
+            foreach (HiddenNeuron neuron in HiddenLayer)
             {
                 neuron.ShortMemoryToLong();
             }

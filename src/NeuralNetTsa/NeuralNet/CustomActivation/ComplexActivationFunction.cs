@@ -15,7 +15,7 @@ public abstract class ComplexActivationFunction : IActivationFunction
 
         for (int i = 0; i < Capacity; i++)
         {
-            Neuron.Outputs.Add(new PruneSynapse(i, i));
+            Neuron.Outputs[i] = new PruneSynapse(i, i);
         }
     }
 

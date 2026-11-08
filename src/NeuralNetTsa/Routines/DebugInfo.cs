@@ -12,8 +12,8 @@ internal class DebugInfo
 {
     public static void Write(ChaosNeuralNet net, double[] les, double lle)
     {
-        double eBest = net.OutputLayer.Neurons[0].ShortMemory[0];
-        
+        double eBest = net.OutputLayer[0].ShortMemory[0];
+
         StringBuilder debug = new StringBuilder()
             .AppendLine($"\nEpoch {net.successCount}")
             .AppendFormat(CultureInfo.InvariantCulture, "ε = {0:e}\n", net.Epsilon)
@@ -32,12 +32,12 @@ internal class DebugInfo
 
         debug.AppendLine();
 
-        Array.ForEach(net.NeuronConstant.ShortMemory, 
+        Array.ForEach(net.NeuronConstant.ShortMemory,
             memory => debug.Append(FormatNeuronValue(memory)));
 
         debug.AppendLine();
 
-        foreach (InputNeuron neuron in net.InputLayer.Neurons)
+        foreach (InputNeuron neuron in net.InputLayer)
         {
             Array.ForEach(neuron.ShortMemory,
                 memory => debug.Append(FormatNeuronValue(memory)));
@@ -47,7 +47,7 @@ internal class DebugInfo
 
         debug.AppendLine();
 
-        Array.ForEach(net.HiddenLayer.Neurons,
+        Array.ForEach(net.HiddenLayer,
             neuron => debug.Append(FormatNeuronValue(neuron.ShortMemory[0])));
 
         debug.AppendLine("\n\n- - -");

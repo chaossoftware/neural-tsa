@@ -42,7 +42,7 @@ internal sealed class Calculations
         _rectangleSize = new Size(_outParams.AnimationSize.Width, _outParams.AnimationSize.Height / 4);
 
         Size netImageSize = new Size(_outParams.AnimationSize.Width / 8, _outParams.AnimationSize.Height / 4);
-        
+
         Visualizator = new NetVisualizer(netImageSize, _outParams.SaveAnimation, _paths.AnimationFile);
 
         _originalData = originalData;
@@ -170,7 +170,7 @@ internal sealed class Calculations
             signal = signalPlot.Render();
         }
 
-        double error = Math.Log10(net.OutputLayer.Neurons[0].ShortMemory[0]);
+        double error = Math.Log10(net.OutputLayer[0].ShortMemory[0]);
         error = Math.Min(error, 0);
         error = Math.Max(error, -10);
 

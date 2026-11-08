@@ -1,13 +1,13 @@
 ﻿namespace NeuralNetTsa.NeuralNet.Entities;
 
-public sealed class OutputNeuron : NudgeNeuron<OutputNeuron>
+public sealed class OutputNeuron : NudgeNeuron
 {
 
-    public OutputNeuron(int capacity) : base(capacity)
+    public OutputNeuron(int inputs) : base(inputs, 1)
     {
     }
 
-    public OutputNeuron(double nudge, int capacity) : base(nudge, capacity)
+    public OutputNeuron(double nudge, int inputs) : base(nudge, inputs, 1)
     {
     }
 

@@ -41,12 +41,12 @@ public sealed class ConsoleNetVisualizer
 
         _inOffsetY = _maxItemsCount / _inCount + MinOffsetY;
         _hiddenOffsetY = _maxItemsCount / _hiddenCount + MinOffsetY;
-        _outOffsetY = _maxItemsCount / neuralNet.OutputLayer.Neurons.Length / 2 + MinOffsetY;
+        _outOffsetY = _maxItemsCount / neuralNet.OutputLayer.Length / 2 + MinOffsetY;
     }
 
     public void ReportCycle(ChaosNeuralNet net)
     {
-        double error = net.OutputLayer.Neurons[0].ShortMemory[0];
+        double error = net.OutputLayer[0].ShortMemory[0];
         string currentIteration = net.current.ToString("#,#").PadLeft(9);
         string currentEpoch = net.successCount.ToString().PadLeft(2);
 
@@ -82,8 +82,8 @@ public sealed class ConsoleNetVisualizer
 
     private void Visualize()
     {
-        double maxSynapseValue = _neuralNet.InputLayer.Neurons.SelectMany(n => n.Outputs).Max(s => s.Signal);
-        double minSynapseValue = _neuralNet.InputLayer.Neurons.SelectMany(n => n.Outputs).Min(s => s.Signal);
+        double maxSynapseValue = _neuralNet.InputLayer.SelectMany(n => n.Outputs).Max(s => s.Signal);
+        double minSynapseValue = _neuralNet.InputLayer.SelectMany(n => n.Outputs).Min(s => s.Signal);
 
         double segment = (maxSynapseValue - minSynapseValue) / 3d;
         double lowSynapseTreshold = minSynapseValue + segment;
@@ -91,7 +91,7 @@ public sealed class ConsoleNetVisualizer
 
         int i = 1;
 
-        foreach (InputNeuron inn in _neuralNet.InputLayer.Neurons)
+        foreach (InputNeuron inn in _neuralNet.InputLayer)
         {
             Console.SetCursorPosition(RightPartOffset, i * _inOffsetY + TopRightOffset);
             Console.Write($"{InputNeuron} ");
@@ -99,15 +99,15 @@ public sealed class ConsoleNetVisualizer
             i++;
         }
 
-        maxSynapseValue = _neuralNet.HiddenLayer.Neurons.SelectMany(n => n.Outputs).Max(s => s.Signal);
-        minSynapseValue = _neuralNet.HiddenLayer.Neurons.SelectMany(n => n.Outputs).Min(s => s.Signal);
+        maxSynapseValue = _neuralNet.HiddenLayer.SelectMany(n => n.Outputs).Max(s => s.Signal);
+        minSynapseValue = _neuralNet.HiddenLayer.SelectMany(n => n.Outputs).Min(s => s.Signal);
 
         segment = (maxSynapseValue - minSynapseValue) / 3d;
         lowSynapseTreshold = minSynapseValue + segment;
         highSynapseTreshold = minSynapseValue + 2d * segment;
         i = 1;
 
-        foreach (HiddenNeuron hn in _neuralNet.HiddenLayer.Neurons)
+        foreach (HiddenNeuron hn in _neuralNet.HiddenLayer)
         {
             Console.SetCursorPosition(RightPartOffset + 7, i * _hiddenOffsetY + TopRightOffset);
             DrawNeuron(hn);
@@ -116,7 +116,7 @@ public sealed class ConsoleNetVisualizer
         }
 
         Console.SetCursorPosition(RightPartOffset + 14, _outOffsetY + TopRightOffset);
-        DrawNeuron(_neuralNet.OutputLayer.Neurons[0]);
+        DrawNeuron(_neuralNet.OutputLayer[0]);
         DrawSynapse(1, 1, 1);
     }
 

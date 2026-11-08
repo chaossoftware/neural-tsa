@@ -42,10 +42,10 @@ internal static class Lle
 
                 for (int j = 0; j < dimensions; j++)
                 {
-                    arg += net.InputLayer.Neurons[j].Outputs[i].Weight * net.xdata[k - j - 1];
+                    arg += net.InputLayer[j].Outputs[i].Weight * net.xdata[k - j - 1];
                 }
 
-                x += net.HiddenLayer.Neurons[i].Outputs[0].Weight * net.Params.ActFunction.Phi(arg);
+                x += net.HiddenLayer[i].Outputs[0].Weight * net.Params.ActFunction.Phi(arg);
             }
 
             double xe = net.NeuronBias.Outputs[0].Weight;
@@ -56,10 +56,10 @@ internal static class Lle
 
                 for (int j = 0; j < dimensions; j++)
                 {
-                    arg += net.InputLayer.Neurons[j].Outputs[i].Weight * (net.xdata[k - j - 1] + dx[j]);
+                    arg += net.InputLayer[j].Outputs[i].Weight * (net.xdata[k - j - 1] + dx[j]);
                 }
 
-                xe += net.HiddenLayer.Neurons[i].Outputs[0].Weight * net.Params.ActFunction.Phi(arg);
+                xe += net.HiddenLayer[i].Outputs[0].Weight * net.Params.ActFunction.Phi(arg);
             }
 
             double rs = 0;

@@ -35,10 +35,10 @@ internal static class SignalPrediction
 
                 for (int j = 0; j < dimensions; j++)
                 {
-                    arg += net.InputLayer.Neurons[j].LongMemory[i] * xpred[k - j - 1];
+                    arg += net.InputLayer[j].LongMemory[i] * xpred[k - j - 1];
                 }
 
-                predPt += net.HiddenLayer.Neurons[i].LongMemory[0] * net.Params.ActFunction.Phi(arg);
+                predPt += net.HiddenLayer[i].LongMemory[0] * net.Params.ActFunction.Phi(arg);
             }
 
             xpred[k] = predPt;

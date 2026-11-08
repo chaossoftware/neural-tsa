@@ -8,8 +8,8 @@ internal static class NeuralNetDataConverter
 {
     internal static double[,] GetL1Connections(ChaosNeuralNet neuralNet)
     {
-        HiddenNeuron[] neurons = neuralNet.HiddenLayer.Neurons;
-        InputNeuron[] inputs = neuralNet.InputLayer.Neurons;
+        HiddenNeuron[] neurons = neuralNet.HiddenLayer;
+        InputNeuron[] inputs = neuralNet.InputLayer;
         double[,] arr = new double[neurons.Length, inputs.Length];
 
         for (int i = 0; i < neurons.Length; i++)
@@ -24,7 +24,7 @@ internal static class NeuralNetDataConverter
     }
 
     internal static double[] GetL2Connections(ChaosNeuralNet neuralNet) =>
-        neuralNet.HiddenLayer.Neurons
+        neuralNet.HiddenLayer
         .Select(n => n.Outputs[0].Weight)
         .ToArray();
 }

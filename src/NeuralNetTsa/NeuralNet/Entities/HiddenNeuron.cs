@@ -2,15 +2,15 @@
 
 namespace NeuralNetTsa.NeuralNet.Entities;
 
-public sealed class HiddenNeuron : NudgeNeuron<HiddenNeuron>
+public sealed class HiddenNeuron : NudgeNeuron
 {
     public static IActivationFunction Function;
 
-    public HiddenNeuron(int capacity) : base(capacity)
+    public HiddenNeuron(int inputs, int capacity) : base(inputs, capacity)
     {
     }
 
-    public HiddenNeuron(double nudge, int capacity) : base(nudge, capacity)
+    public HiddenNeuron(double nudge, int inputs, int capacity) : base(nudge, inputs, capacity)
     {
     }
 
