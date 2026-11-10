@@ -118,6 +118,9 @@ public sealed class Config
 
         Output = new OutputParams(outDir);
 
+        var suffix = xParams.Element("NameSuffix");
+        Output.NameSuffix = suffix?.Value ?? "";
+
         var xPrediction = xParams.Element("prediction");
         Output.PtsToPredict = ParseInt(xPrediction.Attribute("predict").Value);
         Output.PtsToTrain = ParseInt(xPrediction.Attribute("train").Value);
@@ -129,9 +132,6 @@ public sealed class Config
 
         var xPlots = xParams.Element("plots");
         var xAnimation = xParams.Element("animation");
-        var xLeInTime = xParams.Element("leInTime");
-
-        Output.SaveLeInTime = bool.Parse(xLeInTime.Attribute("build").Value);
 
         Output.PlotsSize = new Size(
             ParseInt(xPlots.Attribute("width").Value),

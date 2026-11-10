@@ -11,6 +11,8 @@ public sealed class OutputParams
 
     public string ResultsDir { get; }
 
+    public string NameSuffix { get; set; }
+
     public bool SaveModel { get; set; } = true;
 
     public int ModelPts { get; set; } = 100000;
@@ -20,8 +22,6 @@ public sealed class OutputParams
     public int WavLengthSec { get; set; } = 2;
 
     public int PredictedSignalPts { get; set; }
-
-    public bool SaveLeInTime { get; set; } = true;
 
     public Size PlotsSize { get; set; } = new Size(640, 360);
 
@@ -33,6 +33,6 @@ public sealed class OutputParams
 
     public int PtsToTrain { get; set; }
 
-    public OutputPaths PathsFor(DataFileParams dataFileParams) => 
-        new(ResultsDir, dataFileParams);
+    public OutputPaths PathsFor(DataFileParams dataFileParams) =>
+        new(ResultsDir, NameSuffix, dataFileParams);
 }
