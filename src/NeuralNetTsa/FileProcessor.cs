@@ -31,9 +31,6 @@ internal static class FileProcessor
 
         Logger.Init(paths.LogFile);
 
-        Charts.PlotSourceSignalChart(output, paths, data.TimeSeries);
-        Charts.PlotDelayedCoordinatesChart(output, paths.DelayedCoordPlotFile, data.TimeSeries.YValues);
-
         int length = data.TimeSeries.YValues.Length - output.PtsToTrain;
         var xdata = data.TimeSeries.YValues.Take(length).ToArray();
 

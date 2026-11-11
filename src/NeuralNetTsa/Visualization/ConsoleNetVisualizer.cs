@@ -9,9 +9,10 @@ namespace NeuralNetTsa.Visualization;
 public sealed class ConsoleNetVisualizer
 {
     public const int EndOfOutput = ReportOffset + 8;
-    private const int ReportOffset = 17;
-    private const int InfoBorderOffset = 44;
-    private const int RightPartOffset = 45;
+    private const int ReportOffset = 18;
+    private const int InfoBorderOffset = 42;
+    private const int NeuralNetBorderRight = InfoBorderOffset + 22;
+    private const int RightPartOffset = InfoBorderOffset + 2;
     private const int TopRightOffset = 6;
 
     private const string InputNeuron = ">";
@@ -19,8 +20,10 @@ public sealed class ConsoleNetVisualizer
 
     private const int MinOffsetY = 0;
 
-    private readonly string _delimiterLong = new string('─', InfoBorderOffset - 2) + "┬" + new string('─', 22);
-    private readonly string _delimiter = new string('─', InfoBorderOffset - 2) + "┘";
+    private readonly string _delimiterLong = new string('─', InfoBorderOffset) + "╥" + new string('─', 21) + "┐";
+    // private readonly string _delimiterLong = new string('─', InfoBorderOffset) + "┬" + new string('─', 21) + "┐";
+    private readonly string _delimiterBottomLong = new string('─', InfoBorderOffset) + "╨" + new string('─', 21) + "┘";
+    // private readonly string _delimiterBottomLong = new string('─', InfoBorderOffset) + "┴" + new string('─', 21) + "┘";
 
     private readonly int _inCount;
     private readonly int _hiddenCount;
@@ -66,18 +69,24 @@ public sealed class ConsoleNetVisualizer
     {
         Console.WriteLine(_delimiterLong);
 
-        Console.Write("\x1b[37m");
+        Console.Write("\x1b[90m");
         Console.WriteLine(neuralNetParams.GetInfoFull());
         Console.ResetColor();
 
         for (int i = 2; i < ReportOffset; i++)
         {
-            Console.SetCursorPosition(InfoBorderOffset - 2, i);
-            Console.Write("│");
+            Console.SetCursorPosition(InfoBorderOffset, i);
+            Console.Write("║");//"│");
         }
 
         Console.SetCursorPosition(0, ReportOffset);
-        Console.WriteLine(_delimiter);
+        Console.WriteLine(_delimiterBottomLong);
+
+        for (int i = 2; i < ReportOffset; i++)
+        {
+            Console.SetCursorPosition(NeuralNetBorderRight, i);
+            Console.Write("│");
+        }
     }
 
     private void Visualize()
