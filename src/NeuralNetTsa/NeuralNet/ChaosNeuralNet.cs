@@ -99,7 +99,14 @@ public sealed class ChaosNeuralNet : INeuralNet
             else
             {
                 OutputLayer[0].ShortMemory[0] = 10 * OutputLayer[0].LongMemory[0];
-                ddw = Math.Min(Params.MaxPertrubation, Math.Sqrt(OutputLayer[0].LongMemory[0]));
+
+                // OLD-IMPL
+                // ddw = Math.Min(Params.MaxPertrubation, Math.Sqrt(OutputLayer[0].LongMemory[0]));
+
+                // adaptive "cooling"
+                // double coolingFactor = Math.Max(0.05, 1.0 - ((double)successCount / Params.Trainings));
+                double coolingFactor = 1.0 - ((double)successCount / Params.Trainings);
+                ddw = Math.Min(Params.MaxPertrubation, Math.Sqrt(OutputLayer[0].LongMemory[0]) * coolingFactor);
             }
 
             #region "update memory with best results"
@@ -226,15 +233,41 @@ public sealed class ChaosNeuralNet : INeuralNet
                         InputLayer[j].Inputs[0].Signal = xdata[k - j - 1];
                     }
 
-                    Array.ForEach(InputLayer, n => n.Process());
+                    foreach (InputNeuron neuron in InputLayer)
+                    {
+                        neuron.Process();
+                    }
 
-                    Array.ForEach(HiddenLayer, n => n.Process());
+                    foreach (HiddenNeuron neuron in HiddenLayer)
+                    {
+                        neuron.Process();
+                    }
 
-                    Array.ForEach(OutputLayer, n => n.Process());
+                    foreach (OutputNeuron neuron in OutputLayer)
+                    {
+                        neuron.Process();
+                    }
 
                     //Error in the prediction of the k-th data point
-                    double ex = Math.Abs(OutputLayer[0].Outputs[0].Signal - xdata[k]);
-                    e1 += Math.Pow(ex, Params.ErrorsExponent);
+
+                    // OLD-IMPL
+                    // double ex = Math.Abs(OutputLayer[0].Outputs[0].Signal - xdata[k]);
+                    // e1 += Math.Pow(ex, Params.ErrorsExponent);
+
+
+                    double predPoint = OutputLayer[0].Outputs[0].Signal;
+                    double realPoint = xdata[k];
+
+                    // Error of point
+                    double e_position = Math.Pow(Math.Abs(predPoint - realPoint), Params.ErrorsExponent);
+
+                    // Prediction error of 1st derivative
+                    double predVelocity = predPoint - xdata[k - 1];
+                    double realVelocity = realPoint - xdata[k - 1];
+                    double e_velocity = Math.Pow(Math.Abs(predVelocity - realVelocity), Params.ErrorsExponent);
+
+                    // Final loss with weight coefficient
+                    e1 += e_position + 0.2 * e_velocity;
                 }
 
                 //"Mean-square" error (even for e&<>2)
