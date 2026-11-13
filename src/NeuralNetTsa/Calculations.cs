@@ -65,12 +65,6 @@ internal sealed class Calculations
         LeSpecCalculator leSpecCalculator = new();
         leSpecCalculator.Calculate(net);
 
-        // TODO!!!
-        //if (_outParams.SaveLeInTime)
-        //{
-        //    DataWriter.CreateDataFile(_outParams.LeInTimeFile, leSpec.SpectrumInTime);
-        //}
-
         AttractorData data = Attractor.Construct(net, _outParams.PredictedSignalPts);
 
         try
@@ -92,7 +86,7 @@ internal sealed class Calculations
             Sound.CreateWavFile(_paths.WavFile, data.Yt);
         }
 
-        ScottPlot.Plot pPlot = Charts.NewPlot(_squareSize, "Delayed coordinates", "t", "t+1");
+        ScottPlot.Plot pPlot = Charts.NewPlot(_squareSize, "Delayed coordinates", "f(t)", "f(t+1)");
         pPlot.Grid(enable: false);
 
         try
@@ -135,8 +129,6 @@ internal sealed class Calculations
 
         DebugInfo.Write(net, leSpecCalculator.Result, lle);
 
-        Visualizator.DrawBrain(net).Save(_paths.NetPlotFile, ImageFormat.Png);
-
         _trialsHistory.Add(_errors.ToArray());
         _errors.Clear();
     }
@@ -145,7 +137,7 @@ internal sealed class Calculations
     {
         if (poincare == null)
         {
-            ScottPlot.Plot pPlot = Charts.NewPlot(_squareSize, "Delayed coordinates", "t", "t+1");
+            ScottPlot.Plot pPlot = Charts.NewPlot(_squareSize, "Delayed coordinates", "f(t)", "f(t+1)");
             pPlot.Grid(enable: false);
 
             foreach (DataPoint dp in DelayedCoordinates.GetData(net.xdata).DataPoints)

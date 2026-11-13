@@ -2,6 +2,7 @@
 using System;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -24,7 +25,7 @@ internal class Program
         {
             Console.Clear();
             Console.Write($"[V{string.Join(".", versionInfo.FileVersion.Split('.').Take(3))}] ");
-            Console.WriteLine($"File: {dataFile.FileName}");
+            Console.WriteLine($"File: {Path.GetFileName(dataFile.FileName)}");
             FileProcessor.ProcessFile(config, dataFile);
         }
     }

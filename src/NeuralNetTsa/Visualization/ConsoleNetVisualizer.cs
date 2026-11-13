@@ -9,18 +9,21 @@ namespace NeuralNetTsa.Visualization;
 public sealed class ConsoleNetVisualizer
 {
     public const int EndOfOutput = ReportOffset + 8;
-    private const int ReportOffset = 17;
-    private const int InfoBorderOffset = 47;
-    private const int RightPartOffset = 49;
-    private const int TopRightOffset = 7;
+    private const int ReportOffset = 18;
+    private const int InfoBorderOffset = 42;
+    private const int NeuralNetBorderRight = InfoBorderOffset + 22;
+    private const int RightPartOffset = InfoBorderOffset + 2;
+    private const int TopRightOffset = 6;
 
     private const string InputNeuron = ">";
-    private const string Synapse = "==>";
+    private const string Synapse = "───›";
 
     private const int MinOffsetY = 0;
 
-    private readonly string _delimiterLong = new string('─', InfoBorderOffset - 2) + "┬" + new string('─', 22);
-    private readonly string _delimiter = new string('─', InfoBorderOffset - 2) + "┘";
+    private readonly string _delimiterLong = new string('─', InfoBorderOffset) + "╥" + new string('─', 21) + "┐";
+    // private readonly string _delimiterLong = new string('─', InfoBorderOffset) + "┬" + new string('─', 21) + "┐";
+    private readonly string _delimiterBottomLong = new string('─', InfoBorderOffset) + "╨" + new string('─', 21) + "┘";
+    // private readonly string _delimiterBottomLong = new string('─', InfoBorderOffset) + "┴" + new string('─', 21) + "┘";
 
     private readonly int _inCount;
     private readonly int _hiddenCount;
@@ -48,13 +51,13 @@ public sealed class ConsoleNetVisualizer
     {
         double error = net.OutputLayer[0].ShortMemory[0];
         string currentIteration = net.current.ToString("#,#").PadLeft(9);
-        string currentEpoch = net.successCount.ToString().PadLeft(2);
+        string currentEpoch = (net.successCount + 1).ToString().PadLeft(2);
 
-        Console.SetCursorPosition(RightPartOffset, 3);
+        Console.SetCursorPosition(RightPartOffset, 2);
         Console.WriteLine($"Epoch {currentEpoch}: {currentIteration}");
-        Console.SetCursorPosition(RightPartOffset, 5);
+        Console.SetCursorPosition(RightPartOffset, 4);
         Console.WriteLine($"ε  =  {net.Epsilon:e}");
-        Console.SetCursorPosition(RightPartOffset, 6);
+        Console.SetCursorPosition(RightPartOffset, 5);
         Console.WriteLine($"e  =  {error:e}");
 
         Visualize();
@@ -66,18 +69,24 @@ public sealed class ConsoleNetVisualizer
     {
         Console.WriteLine(_delimiterLong);
 
-        Console.Write("\x1b[37m");
+        Console.Write("\x1b[90m");
         Console.WriteLine(neuralNetParams.GetInfoFull());
         Console.ResetColor();
 
         for (int i = 2; i < ReportOffset; i++)
         {
-            Console.SetCursorPosition(InfoBorderOffset - 2, i);
-            Console.Write("│");
+            Console.SetCursorPosition(InfoBorderOffset, i);
+            Console.Write("║");//"│");
         }
 
         Console.SetCursorPosition(0, ReportOffset);
-        Console.WriteLine(_delimiter);
+        Console.WriteLine(_delimiterBottomLong);
+
+        for (int i = 2; i < ReportOffset; i++)
+        {
+            Console.SetCursorPosition(NeuralNetBorderRight, i);
+            Console.Write("│");
+        }
     }
 
     private void Visualize()
@@ -94,7 +103,7 @@ public sealed class ConsoleNetVisualizer
         foreach (InputNeuron inn in _neuralNet.InputLayer)
         {
             Console.SetCursorPosition(RightPartOffset, i * _inOffsetY + TopRightOffset);
-            Console.Write($"{InputNeuron} ");
+            Console.Write($"{InputNeuron}");
             DrawSynapse(inn.Outputs[0].Signal, lowSynapseTreshold, highSynapseTreshold);
             i++;
         }
@@ -125,7 +134,7 @@ public sealed class ConsoleNetVisualizer
         var color = neuron.Outputs[0].Signal > 0 ? "\x1b[32m" : "\x1b[37m";
 
         Console.Write(color);
-        Console.Write("■ ");
+        Console.Write("@");
         Console.ResetColor();
     }
 
@@ -134,7 +143,7 @@ public sealed class ConsoleNetVisualizer
         var color = neuron.Outputs[0].Signal > 0 ? "\x1b[32m" : "\x1b[37m";
 
         Console.Write(color);
-        Console.Write("● ");
+        Console.Write("@");
         Console.ResetColor();
     }
 
